@@ -54,7 +54,7 @@ The system is built as a pipeline:
 
 ## Architecture / Workflow
 
-![Workflow](Assets/architecture.jpg)
+![Workflow](app/Assets/architecture.jpg)
 
 ---
 
