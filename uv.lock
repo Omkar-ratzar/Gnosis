@@ -906,10 +906,10 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "docx2txt" },
-    { name = "mysql-connector-python" },
     { name = "numpy" },
     { name = "ollama" },
     { name = "pillow" },
+    { name = "psycopg2-binary" },
     { name = "pymupdf" },
     { name = "python-dotenv" },
     { name = "python-magic", marker = "sys_platform != 'win32'" },
@@ -933,10 +933,10 @@ requires-dist = [
     { name = "apache-airflow-providers-mysql", marker = "extra == 'airflow'" },
     { name = "apache-airflow-providers-postgres", marker = "extra == 'airflow'" },
     { name = "docx2txt", specifier = "==0.9" },
-    { name = "mysql-connector-python", specifier = ">=9.0.0" },
     { name = "numpy", specifier = ">=1.26,<3.0" },
     { name = "ollama", specifier = "==0.6.1" },
     { name = "pillow", specifier = "==12.2.0" },
+    { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "pymupdf", specifier = ">=1.24.0" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "python-magic", marker = "sys_platform != 'win32'", specifier = ">=0.4.27" },

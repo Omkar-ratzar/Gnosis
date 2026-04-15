@@ -18,8 +18,8 @@ def upsert_file(path):
             query = """
             INSERT INTO all_files (file_path, file_status, last_modified)
             VALUES (%s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-                last_modified = VALUES(last_modified),
+            ON CONFLICT (file_path) DO UPDATE SET
+                last_modified = EXCLUDED.last_modified,
                 file_status = 'NEW'
             """
 

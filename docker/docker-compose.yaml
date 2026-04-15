@@ -100,11 +100,11 @@ services:
     image: postgres:16
     environment:
       POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: airflow
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
-
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     healthcheck:
@@ -113,6 +113,15 @@ services:
       retries: 5
       start_period: 5s
     restart: always
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
 
   redis:
     # Redis is limited to 7.2-bookworm due to licencing change
@@ -344,3 +353,5 @@ services:
 
 volumes:
   postgres-db-volume:
+  postgres_data:
+  qdrant_data:

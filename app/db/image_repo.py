@@ -18,11 +18,11 @@ def upsert_image_metadata(file_id, file_path, description, exif_dict, status="NE
             query = """
             INSERT INTO image_metadata (file_id, file_path, description, exif, status)
             VALUES (%s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-                file_path = VALUES(file_path),
-                description = VALUES(description),
-                exif = VALUES(exif),
-                status = VALUES(status)
+            ON CONFLICT (file_path) DO UPDATE SET
+                file_path = EXCLUDED.file_path,
+                description = EXCLUDED.description,
+                exif = EXCLUDED.exif,
+                status = EXCLUDED.status
             """
 
             exif_json = json.dumps(exif_dict) if exif_dict else None

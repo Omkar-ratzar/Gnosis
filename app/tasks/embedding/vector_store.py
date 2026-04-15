@@ -1,11 +1,16 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct
 from config.config import config
+from dotenv import load_dotenv
 import uuid
+import os
 COLLECTION_NAME = "documents"
 
-client = QdrantClient(host="localhost", port=6333)
-
+# client = QdrantClient(host="localhost", port=6333) CHANGING THIS TO TURN TO AIRFLOW INSTEAD OF LOCAL SETUP
+client = QdrantClient(
+    host=os.getenv("QDRANT_HOST", "localhost"),
+    port=int(os.getenv("QDRANT_PORT", 6333))
+)
 
 def init_collection(dim: int):
     if COLLECTION_NAME in [c.name for c in client.get_collections().collections]:
