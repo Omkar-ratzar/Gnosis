@@ -1,8 +1,8 @@
 import numpy as np
-from core.errors import safe_execution
-from config.config import config
-from tasks.embedding.model_loader import get_model
-from tasks.embedding.normalize import normalize
+from app.core.errors import safe_execution
+from app.config.config import config
+from app.tasks.embedding.model_loader import get_model
+from app.tasks.embedding.normalize import normalize
 
 batch_size = config["batch"]["embedding_batch_size"]
 show_progress = config["embedding"]["show_progress"]

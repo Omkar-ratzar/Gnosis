@@ -1,6 +1,6 @@
 from functools import wraps
 import traceback
-from core.log import logger
+from app.core.log import logger
 
 def safe_execution(
     component="GENERAL",

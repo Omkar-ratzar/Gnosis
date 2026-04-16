@@ -1,8 +1,8 @@
 import docx2txt
-from core.log import logger
-from core.errors import safe_execution
-from db.file_repo import mark_processed
-from core.utils import normalize_path
+from app.core.log import logger
+from app.core.errors import safe_execution
+from app.db.file_repo import mark_processed
+from app.core.utils import normalize_path
 
 @safe_execution(component="EXTRACTOR",log_args=True)
 def extract_docx(path):

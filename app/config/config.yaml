@@ -23,6 +23,7 @@ paths:
   embeddings: "embeddings.npy"
   chunks: "chunks.json"
   watcher: "E:\\Coding\\search_sample\\data" #
+  input_dir: "/opt/airflow/app/data"
 
 processing:
   max_retries: 3

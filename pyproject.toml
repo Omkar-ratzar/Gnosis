@@ -24,6 +24,8 @@ dependencies = [
     "qdrant-client>=1.9.0",
     "python-magic-bin>=0.4.14",
     "psycopg2-binary>=2.9.11",
+    "pendulum>=3.2.0",
+    "python-magic>=0.4.27",
 ]
 
 [project.optional-dependencies]

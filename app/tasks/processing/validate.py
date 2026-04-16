@@ -1,8 +1,9 @@
-from config.config import config
+from app.config.config import config
 import os
 import magic
 
-BASE_DIR = config["paths"]["watcher"]
+# BASE_DIR = config["paths"]["input_dir"]
+BASE_DIR = os.path.realpath(config["paths"]["input_dir"])
 
 # =========================
 # QUERY VALIDATION
@@ -39,17 +40,14 @@ EXTENSION_TO_MIME = {
 
 
 def validate_path(path: str, base_dir: str = BASE_DIR) -> bool:
-    if not os.path.exists(path):
+    if not os.path.exists(path) or os.path.islink(path):
         return False
 
-    if os.path.islink(path):
-        return False
 
     real_path = os.path.realpath(path)
-    base_dir = os.path.realpath(base_dir)
-
-    return real_path.startswith(base_dir + os.sep)
-
+    # base_dir = os.path.realpath(base_dir)
+    # return real_path.startswith(base_dir + os.sep)
+    return os.path.commonpath([real_path, base_dir]) == base_dir
 
 def is_valid_extension(path: str) -> bool:
     if not os.path.isfile(path):

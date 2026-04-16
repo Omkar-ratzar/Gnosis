@@ -1,6 +1,6 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct
-from config.config import config
+from app.config.config import config
 from dotenv import load_dotenv
 import uuid
 import os

@@ -1,4 +1,4 @@
-from .extract_image import extract_image
+from app.tasks.extraction.extract_image import extract_image
 from .extract_exif import extract_exif
 
 def process_image(path):

@@ -1,9 +1,9 @@
-from db.connection import get_connection
+from app.db.connection import get_connection
 from datetime import datetime
 import json
 import time
-from core.log import logger
-from config.config import config
+from app.core.log import logger
+from app.config.config import config
 MAX_RETRIES = config["processing"]["max_retries"]
 
 

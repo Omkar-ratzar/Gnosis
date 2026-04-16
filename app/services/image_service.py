@@ -1,10 +1,10 @@
-from db.image_repo import mark_processed_metadata
-from db.image_repo import mark_processing_metadata
-from db.image_repo import upsert_image_metadata
-from db.file_repo import mark_processed
-from tasks.extraction.extract_image import extract_image
-from tasks.extraction.extract_exif import extract_exif
-from core.log import logger
+from app.db.image_repo import mark_processed_metadata
+from app.db.image_repo import mark_processing_metadata
+from app.db.image_repo import upsert_image_metadata
+from app.db.file_repo import mark_processed
+from app.tasks.extraction.extract_image import extract_image
+from app.tasks.extraction.extract_exif import extract_exif
+from app.core.log import logger
 
 
 def process_image(file):

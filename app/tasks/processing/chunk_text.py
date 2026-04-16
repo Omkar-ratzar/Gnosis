@@ -1,6 +1,6 @@
-from core.errors import safe_execution
-from core.log import logger
-from config.config import config
+from app.core.errors import safe_execution
+from app.core.log import logger
+from app.config.config import config
 
 chunk_size= config["chunking"]["chunk_size"]
 overlap= config["chunking"]["overlap"]

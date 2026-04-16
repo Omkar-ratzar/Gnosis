@@ -1,8 +1,8 @@
-from .image_service import process_image
-from db.image_repo import get_new_images
+from app.services.image_service import process_image
+from app.db.image_repo import get_new_images
 
-from .document_service import process_document
-from db.file_repo import get_new_documents
+from app.services.document_service import process_document
+from app.db.file_repo import get_new_documents
 
 def process_new_images(limit):
     files = get_new_images(limit)

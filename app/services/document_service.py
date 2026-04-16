@@ -1,9 +1,9 @@
-from tasks.extraction.dispatcher import extract_document
-from tasks.processing.chunk_text import chunk_text
-from tasks.embedding.embed_chunks import embed_chunks
-from tasks.embedding.vector_store import upsert_vectors, init_collection
-from core.log import logger
-from config.config import config
+from app.tasks.extraction.dispatcher import extract_document
+from app.tasks.processing.chunk_text import chunk_text
+from app.tasks.embedding.embed_chunks import embed_chunks
+from app.tasks.embedding.vector_store import upsert_vectors, init_collection
+from app.core.log import logger
+from app.config.config import config
 import uuid
 
 def process_document(file):

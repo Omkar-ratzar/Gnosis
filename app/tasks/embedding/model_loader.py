@@ -1,5 +1,5 @@
 from sentence_transformers import SentenceTransformer
-from config.config import config
+from app.config.config import config
 
 _model = None
 

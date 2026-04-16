@@ -1,8 +1,8 @@
 # tasks/io/file_fetch.py
 
-from db.image_repo import get_new_images
-from db.file_repo import get_file_id_by_path
-from config.config import config
+from app.db.image_repo import get_new_images
+from app.db.file_repo import get_file_id_by_path
+from app.config.config import config
 
 limit= config["batch"]["image_processing_batch_size"]
 

@@ -3,7 +3,7 @@ from watchdog.events import FileSystemEventHandler
 import time
 import os
 
-from db.file_repo import (
+from app.db.file_repo import (
     upsert_file,
     mark_modified,
     mark_deleted,
@@ -13,12 +13,12 @@ from db.file_repo import (
     mark_invalid,
 )
 
-from db.image_repo import upsert_image_metadata
+from app.db.image_repo import upsert_image_metadata
 
-from core.log import logger
-from core.errors import safe_execution
-from config.config import config
-from tasks.processing.validate import is_valid
+from app.core.log import logger
+from app.core.errors import safe_execution
+from app.config.config import config
+from app.tasks.processing.validate import is_valid
 
 
 WATCHER_PATH = config["paths"]["watcher"]
