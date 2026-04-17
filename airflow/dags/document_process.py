@@ -19,7 +19,7 @@ limit= config["batch"]["file_processing_batch_size"]
      start_date=datetime(2026, 1, 1),
      schedule=[new_docs_asset],
      catchup=False,
-     tags=["gnosis", "scanner"]
+     tags=["gnosis", "document","processor"]
      )
 def doc_process():
     @task

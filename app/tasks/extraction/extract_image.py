@@ -3,9 +3,10 @@ from app.core.log import logger
 from app.config.config import config
 from app.tasks.processing.sanitize import sanitize_image_output as sanitize_output
 from app.tasks.processing.validate import is_valid_image_output as validate_output
+import os
 
 
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_HOST = "http://host.docker.internal:11434"
 client = ollama.Client(host=OLLAMA_HOST)
 
 def extract_image(path):

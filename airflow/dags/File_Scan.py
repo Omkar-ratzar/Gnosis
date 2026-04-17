@@ -2,12 +2,14 @@ from airflow.sdk import dag, task, Asset
 from airflow.sdk.exceptions import AirflowSkipException
 from app.config.config import config
 from app.tasks.processing.validate import is_valid
-from app.db.file_repo import mark_invalid, mark_processing,upsert_file
+from app.db.file_repo import mark_invalid, mark_processing,upsert_file,get_file_id_by_path
+from app.db.image_repo import upsert_image_metadata
 import os
 from pendulum import datetime
 
 ##OPTIMIZATION TO BE NOTED, this runs every minute and processes every file, next I will process only the files which do not exist in my DB.
 
+#hard coding in vector_db and extract_image for testing purposes, will fix env import later on
 
 #declaring 'Assets', so I can use them as a trigger for other dags
 new_docs_asset = Asset("new_docs_ready")
@@ -59,6 +61,11 @@ def file_scan():
         for f in files:
             if f.lower().endswith(IMAGE_EXTS) and is_valid(f):
                 valid.append(f)
+                file_id = get_file_id_by_path(f)
+                if file_id:
+                    upsert_image_metadata(
+                        file_id, f, None, None, status="NEW"
+                    )
             elif f.lower().endswith(IMAGE_EXTS):
                 invalid.append(f)
                 mark_invalid(f)
