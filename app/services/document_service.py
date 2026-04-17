@@ -14,7 +14,7 @@ def process_document(file):
     if not text:
         logger.error(f"[SERVICE] EXTRACTION FAILED IN document_service.py for {file['file_id']}")
         return
-
+    # return text
 
     chunk_size = config["chunking"]["chunk_size"]
     overlap = config["chunking"]["overlap"]

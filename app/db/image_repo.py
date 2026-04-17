@@ -4,6 +4,7 @@ import json
 import time
 from app.core.log import logger
 from app.config.config import config
+from psycopg2.extras import RealDictCursor
 MAX_RETRIES = config["processing"]["max_retries"]
 
 
@@ -98,7 +99,8 @@ def get_new_images(limit=10):
         cursor = None
         try:
             conn = get_connection()
-            cursor = conn.cursor(dictionary=True)
+            conn.autocommit = False
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
 
             cursor.execute("""
                 SELECT file_id, file_path
@@ -108,6 +110,8 @@ def get_new_images(limit=10):
             """, (limit,))
 
             rows = cursor.fetchall()
+            conn.commit()
+
 
             logger.info(f"get_new_images success: fetched {len(rows)} rows")
             return rows

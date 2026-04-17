@@ -1,9 +1,7 @@
 # Gnosis
 
-## Overview
-This project is a lightweight semantic search engine designed to work on unstructured data stored in blob-like storage systems (local folders in the current setup). Instead of relying on keyword matching, it understands the meaning of content and retrieves relevant results based on intent.
-
-It supports multiple file types including PDFs, DOCX, PPTX, text files, and even images. Images are converted into structured textual descriptions, allowing them to be searched just like documents.
+---
+README TO BE UPDATED. THIS IS README FOR AN OLDER VERSION. IMPLEMENTING AIRFLOW BASED ORCESTRATION RIGHT NOW, BIG FEATURE, will re-update readme soon.
 
 The system continuously watches a directory for changes, processes new or updated files, and builds embeddings for efficient similarity-based search.
 

@@ -1,9 +1,22 @@
-from airflow.sdk import dag, task
+from airflow.sdk import dag, task, Asset
+from airflow.sdk.exceptions import AirflowSkipException
 from app.config.config import config
 from app.tasks.processing.validate import is_valid
 from app.db.file_repo import mark_invalid, mark_processing,upsert_file
 import os
 from pendulum import datetime
+
+##OPTIMIZATION TO BE NOTED, this runs every minute and processes every file, next I will process only the files which do not exist in my DB.
+
+
+#declaring 'Assets', so I can use them as a trigger for other dags
+new_docs_asset = Asset("new_docs_ready")
+new_images_asset = Asset("new_images_ready")
+
+
+IMAGE_EXTS = (".jpg", ".jpeg", ".png")
+DOC_EXTS = (".pdf", ".docx", ".pptx", ".txt")
+
 
 @dag(dag_id="file_scanner",
      start_date=datetime(2026, 1, 1),
@@ -26,28 +39,36 @@ def file_scan():
                 upsert_file(full_path)
         return new_files
 
+    @task(outlets=[new_docs_asset])
+    def validate_docs(files):
+        valid, invalid = [], []
+        for f in files:
+            if f.lower().endswith(DOC_EXTS) and is_valid(f):
+                valid.append(f)
+            elif f.lower().endswith(DOC_EXTS):
+                invalid.append(f)
+                mark_invalid(f)
+        if not valid:
+            raise AirflowSkipException("No valid docs found, skipping asset emit")
 
-    @task
-    def validate_files(files):
-        # ti=kwargs['ti']
-        # new_files=ti.xcom_pull(task_ids='walk_dir',key='return_result')['files']
-        files_to_be_processed=files
-        valid_files=[]
-        invalid_files=[]
-        for file in files_to_be_processed:
-            if(is_valid(file)):
-                valid_files.append(file)
-            else:
-                invalid_files.append(file)
-                mark_invalid(file)
-        return {
-            "valid": valid_files,
-            "invalid": invalid_files
-        }
+        return {"valid": valid, "invalid": invalid}
 
-    
-    validate_files(walk_dir())
+    @task(outlets=[new_images_asset])
+    def validate_images(files):
+        valid, invalid = [], []
+        for f in files:
+            if f.lower().endswith(IMAGE_EXTS) and is_valid(f):
+                valid.append(f)
+            elif f.lower().endswith(IMAGE_EXTS):
+                invalid.append(f)
+                mark_invalid(f)
+        if not valid:
+            raise AirflowSkipException("No valid imgs found, skipping asset emit")
 
+        return {"valid": valid, "invalid": invalid}
 
+    walked = walk_dir()
+    validate_docs(walked)
+    validate_images(walked)
 
 file_scan()

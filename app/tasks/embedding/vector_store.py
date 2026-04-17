@@ -8,8 +8,8 @@ COLLECTION_NAME = "documents"
 
 # client = QdrantClient(host="localhost", port=6333) CHANGING THIS TO TURN TO AIRFLOW INSTEAD OF LOCAL SETUP
 client = QdrantClient(
-    host=os.getenv("QDRANT_HOST", "localhost"),
-    port=int(os.getenv("QDRANT_PORT", 6333))
+    host="qdrant",
+    port=6333
 )
 
 def init_collection(dim: int):

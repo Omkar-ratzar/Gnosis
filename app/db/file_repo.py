@@ -4,6 +4,7 @@ import json
 import time
 from app.core.log import logger
 from app.config.config import config
+from psycopg2.extras import RealDictCursor
 MAX_RETRIES = config["processing"]["max_retries"]
 # MAX_RETRIES = 3
 
@@ -330,9 +331,11 @@ def get_new_documents(limit=10):
         cursor = None
         try:
             conn = get_connection()
-            cursor = conn.cursor(dictionary=True)
+            conn.autocommit = False
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            limit = int(limit)
 
-            cursor.execute("""
+            cursor.execute(f"""
                 SELECT file_id, file_path
                 FROM all_files
                 WHERE file_status = 'NEW'
@@ -342,10 +345,12 @@ def get_new_documents(limit=10):
                     file_path LIKE '%.pptx' OR
                     file_path LIKE '%.txt'
                 )
-                LIMIT %s
-            """, (limit,))
+                FOR UPDATE SKIP LOCKED
+                LIMIT {int(limit)}
+            """)
 
             rows = cursor.fetchall()
+            conn.commit()
 
             logger.info(f"get_new_documents success: fetched {len(rows)} rows")
             return rows

@@ -9,6 +9,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 USER airflow
+COPY requirements.txt .
 
 # Install Python dependency
-RUN pip install --no-cache-dir python-magic
+RUN pip install --no-cache-dir -r requirements.txt
