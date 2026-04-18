@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <style>
+    body { font-family: Arial; background:#111; color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; }
+    .box { background:#1e1e1e; padding:25px; border-radius:10px; width:300px; }
+    input, button { width:100%; margin-top:10px; padding:10px; }
+    button { background:#4CAF50; border:none; color:white; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h3>Gnosis Login</h3>
+  <input id="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+</div>
+
+<script>
+async function login() {
+  const res = await fetch("/auth/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      email: email.value,
+      password: password.value
+    })
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    localStorage.setItem("token", data.access_token);
+    window.location.href = "/upload";
+  } else {
+    alert(data.detail);
+  }
+}
+
+async function register() {
+  const res = await fetch("/auth/register", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      email: email.value,
+      password: password.value
+    })
+  });
+
+  const data = await res.json();
+  alert(data.msg || data.detail);
+}
+</script>
+
+</body>
+</html>

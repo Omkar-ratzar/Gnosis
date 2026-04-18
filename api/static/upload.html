@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload</title>
+  <style>
+    body { font-family: Arial; padding:40px; }
+    nav a { margin-right:15px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/upload">Upload</a>
+  <a href="/search">Search</a>
+  <a href="/about">About</a>
+</nav>
+
+<h2>Upload Files</h2>
+
+<input type="file" id="fileInput"
+       accept=".jpg,.jpeg,.png,.pdf,.docx,.txt,.pptx"/>
+
+<button onclick="upload()">Upload</button>
+
+<script>
+async function upload() {
+  const input = document.getElementById("fileInput");
+  const file = input.files[0];
+
+  if (!file) {
+    alert("Please select a file.");
+    return;
+  }
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    alert("Invalid file type selected.");
+    input.value = "";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("/api/upload/file", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+  alert(data.message || data.error);
+}
+</script>
+
+</body>
+</html>

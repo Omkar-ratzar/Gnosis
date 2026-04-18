@@ -37,7 +37,7 @@ def img_process():
         mark_processing(file["file_path"])
         process_image(file)
 
-        #Right now just parsing embedding and chunking into 
+        #Right now just parsing embedding and chunking into this
 
     files = fetch_files()
     process_single.expand(file=files) #Parallel execution per file

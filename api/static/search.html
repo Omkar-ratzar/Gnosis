@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Search</title>
+  <style>
+    body { font-family: Arial; padding:40px; }
+    nav a { margin-right:15px; }
+    .result { margin-top:10px; padding:10px; border:1px solid #ddd; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/upload">Upload</a>
+  <a href="/search">Search</a>
+  <a href="/about">About</a>
+</nav>
+
+<h2>Search</h2>
+
+<input id="query" placeholder="Enter query" style="width:300px;" />
+<button onclick="runSearch()">Search</button>
+
+<div id="results"></div>
+
+<script>
+async function runSearch() {
+  const res = await fetch("/api/search", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ query: query.value })
+  });
+
+  const data = await res.json();
+
+  const container = document.getElementById("results");
+  container.innerHTML = "";
+
+  data.forEach(r => {
+    const div = document.createElement("div");
+    div.className = "result";
+    div.innerText = `File: ${r.file} | Score: ${r.score}`;
+    container.appendChild(div);
+  });
+}
+</script>
+
+</body>
+</html>

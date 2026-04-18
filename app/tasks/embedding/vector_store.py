@@ -6,11 +6,11 @@ import uuid
 import os
 COLLECTION_NAME = "documents"
 
-# client = QdrantClient(host="localhost", port=6333) CHANGING THIS TO TURN TO AIRFLOW INSTEAD OF LOCAL SETUP
-client = QdrantClient(
-    host="qdrant",
-    port=6333
-)
+client = QdrantClient(host="localhost", port=6333) #CHANGING THIS TO TURN TO AIRFLOW INSTEAD OF LOCAL SETUP
+# client = QdrantClient(
+#     host="qdrant",
+#     port=6333
+# )
 
 def init_collection(dim: int):
     if COLLECTION_NAME in [c.name for c in client.get_collections().collections]:
