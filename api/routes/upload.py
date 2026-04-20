@@ -51,7 +51,7 @@ async def upload_file(file: UploadFile = File(...)):
 
     # If file already exists, prefix with UUID to avoid overwrite
     if os.path.exists(file_path):
-        filename = f"{uuid.uuid4().hex[:8]}_{file.filename}"
+        # filename = f"{uuid.uuid4().hex[:8]}_{file.filename} Will uncomment while implementing user based query retrival
         file_path = os.path.join(UPLOAD_DIR, filename)
 
     with open(file_path, "wb") as buffer:
