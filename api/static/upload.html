@@ -1,63 +1,258 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Upload</title>
-  <style>
-    body { font-family: Arial; padding:40px; }
-    nav a { margin-right:15px; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Upload documents and images to your Gnosis knowledge base for intelligent indexing and search." />
+  <title>Gnosis — Upload</title>
+  <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
 
-<nav>
-  <a href="/upload">Upload</a>
-  <a href="/search">Search</a>
-  <a href="/about">About</a>
+<!-- Navbar -->
+<nav class="navbar">
+  <a href="/" class="nav-brand">
+    <span class="brand-icon">🔮</span>
+    Gnosis
+  </a>
+  <div class="nav-links">
+    <a href="/upload" class="active" id="nav-upload">Upload</a>
+    <a href="/search" id="nav-search">Search</a>
+    <a href="/about" id="nav-about">About</a>
+  </div>
 </nav>
 
-<h2>Upload Files</h2>
+<div class="page-wrapper">
+  <div class="page-content">
 
-<input type="file" id="fileInput"
-       accept=".jpg,.jpeg,.png,.pdf,.docx,.txt,.pptx"/>
+    <!-- Header -->
+    <div class="page-header animate-in">
+      <h1>Upload Files</h1>
+      <p>Add documents and images to your knowledge base for intelligent indexing and semantic search.</p>
+    </div>
 
-<button onclick="upload()">Upload</button>
+    <!-- Dropzone Card -->
+    <div class="glass-card animate-in animate-in-delay-1">
+
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <div class="dropzone-icon">📄</div>
+        <h3>Drop your file here</h3>
+        <p>or <span class="browse-link">browse</span> to choose a file</p>
+        <div class="file-types">
+          <span class="file-type-badge">PDF</span>
+          <span class="file-type-badge">DOCX</span>
+          <span class="file-type-badge">PPTX</span>
+          <span class="file-type-badge">TXT</span>
+          <span class="file-type-badge">JPG</span>
+          <span class="file-type-badge">PNG</span>
+        </div>
+      </div>
+
+      <input type="file" id="fileInput" hidden
+             accept=".jpg,.jpeg,.png,.pdf,.docx,.txt,.pptx" />
+
+      <!-- File Preview -->
+      <div class="file-preview" id="filePreview">
+        <div class="file-preview-icon" id="previewIcon">📄</div>
+        <div class="file-preview-info">
+          <div class="file-preview-name" id="previewName">—</div>
+          <div class="file-preview-size" id="previewSize">—</div>
+        </div>
+        <button class="file-preview-remove" onclick="removeFile()" title="Remove file">✕</button>
+      </div>
+
+      <!-- Progress -->
+      <div class="upload-progress" id="uploadProgress">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <div class="progress-text">
+          <span id="progressLabel">Uploading...</span>
+          <span id="progressPercent">0%</span>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="status-message" id="statusMsg"></div>
+
+      <!-- Upload Button -->
+      <button class="btn btn-primary btn-full btn-lg" id="uploadBtn"
+              onclick="uploadFile()" style="margin-top: 20px;">
+        Upload File
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
 
 <script>
-async function upload() {
-  const input = document.getElementById("fileInput");
-  const file = input.files[0];
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const filePreview = document.getElementById('filePreview');
+  const previewIcon = document.getElementById('previewIcon');
+  const previewName = document.getElementById('previewName');
+  const previewSize = document.getElementById('previewSize');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const uploadProgress = document.getElementById('uploadProgress');
+  const progressFill = document.getElementById('progressFill');
+  const progressLabel = document.getElementById('progressLabel');
+  const progressPercent = document.getElementById('progressPercent');
+  const statusMsg = document.getElementById('statusMsg');
 
-  if (!file) {
-    alert("Please select a file.");
-    return;
-  }
-
-  const allowedTypes = [
-    "image/jpeg",
-    "image/png",
-    "application/pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "text/plain",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+  const ALLOWED_TYPES = [
+    'image/jpeg', 'image/png', 'application/pdf', 'text/plain',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation'
   ];
 
-  if (!allowedTypes.includes(file.type)) {
-    alert("Invalid file type selected.");
-    input.value = "";
-    return;
-  }
+  const FILE_ICONS = {
+    'application/pdf': '📕',
+    'text/plain': '📝',
+    'image/jpeg': '🖼️',
+    'image/png': '🖼️',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '📘',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': '📙'
+  };
 
-  const formData = new FormData();
-  formData.append("file", file);
+  let selectedFile = null;
 
-  const res = await fetch("/api/upload/file", {
-    method: "POST",
-    body: formData
+  // Drag & Drop
+  ['dragenter', 'dragover'].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
   });
 
-  const data = await res.json();
-  alert(data.message || data.error);
-}
+  ['dragleave', 'drop'].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+    });
+  });
+
+  dropzone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file) selectFile(file);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) selectFile(fileInput.files[0]);
+  });
+
+  function selectFile(file) {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      showToast('Unsupported file type', 'error');
+      return;
+    }
+
+    selectedFile = file;
+    previewIcon.textContent = FILE_ICONS[file.type] || '📄';
+    previewName.textContent = file.name;
+    previewSize.textContent = formatSize(file.size);
+    filePreview.classList.add('visible');
+    hideStatus();
+    uploadProgress.classList.remove('visible');
+  }
+
+  function removeFile() {
+    selectedFile = null;
+    fileInput.value = '';
+    filePreview.classList.remove('visible');
+    hideStatus();
+    uploadProgress.classList.remove('visible');
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function showStatus(msg, type) {
+    statusMsg.textContent = (type === 'success' ? '✓ ' : '✕ ') + msg;
+    statusMsg.className = 'status-message visible ' + type;
+  }
+
+  function hideStatus() {
+    statusMsg.className = 'status-message';
+  }
+
+  function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast show ' + type;
+    setTimeout(() => toast.className = 'toast', 3000);
+  }
+
+  async function uploadFile() {
+    if (!selectedFile) {
+      showToast('Please select a file first', 'error');
+      return;
+    }
+
+    hideStatus();
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
+    uploadBtn.style.opacity = '0.7';
+
+    // Show progress
+    uploadProgress.classList.add('visible');
+    progressFill.style.width = '0%';
+    progressPercent.textContent = '0%';
+    progressLabel.textContent = 'Uploading...';
+
+    // Simulate progress (real XHR upload with progress)
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener('progress', e => {
+      if (e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 100);
+        progressFill.style.width = pct + '%';
+        progressPercent.textContent = pct + '%';
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      const data = JSON.parse(xhr.responseText);
+      if (xhr.status >= 200 && xhr.status < 300) {
+        progressFill.style.width = '100%';
+        progressPercent.textContent = '100%';
+        progressLabel.textContent = 'Complete';
+        showStatus('File uploaded successfully!', 'success');
+        showToast('Upload complete ✓', 'success');
+        // Reset after a bit
+        setTimeout(() => {
+          removeFile();
+          uploadProgress.classList.remove('visible');
+          hideStatus();
+        }, 3000);
+      } else {
+        showStatus(data.detail || 'Upload failed', 'error');
+      }
+      resetBtn();
+    });
+
+    xhr.addEventListener('error', () => {
+      showStatus('Network error. Please try again.', 'error');
+      resetBtn();
+    });
+
+    xhr.open('POST', '/api/upload/file');
+    xhr.send(formData);
+  }
+
+  function resetBtn() {
+    uploadBtn.disabled = false;
+    uploadBtn.textContent = 'Upload File';
+    uploadBtn.style.opacity = '1';
+  }
 </script>
 
 </body>

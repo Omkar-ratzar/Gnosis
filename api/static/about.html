@@ -1,26 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>About</title>
-  <style>
-    body { font-family: Arial; padding:40px; }
-    nav a { margin-right:15px; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="About Gnosis — An intelligent, local-first document search and knowledge discovery platform." />
+  <title>Gnosis — About</title>
+  <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
 
-<nav>
-  <a href="/upload">Upload</a>
-  <a href="/search">Search</a>
-  <a href="/about">About</a>
+<!-- Navbar -->
+<nav class="navbar">
+  <a href="/" class="nav-brand">
+    <span class="brand-icon">🔮</span>
+    Gnosis
+  </a>
+  <div class="nav-links">
+    <a href="/upload" id="nav-upload">Upload</a>
+    <a href="/search" id="nav-search">Search</a>
+    <a href="/about" class="active" id="nav-about">About</a>
+  </div>
 </nav>
 
-<h2>About</h2>
+<div class="page-wrapper">
+  <div class="page-content wide">
 
-<p>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-</p>
+    <!-- Header -->
+    <div class="page-header animate-in">
+      <h1>About Gnosis</h1>
+      <p>
+        Gnosis makes unstructured data searchable without manual tagging. It watches your files,
+        understands their content, and builds a semantic knowledge base — all locally.
+      </p>
+    </div>
+
+    <!-- How it Works -->
+    <div class="glass-card animate-in animate-in-delay-1" style="margin-bottom: 32px;">
+      <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">
+        How it Works
+      </h2>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8;">
+        Upload files or drop them into the watched directory. Gnosis automatically extracts text from
+        PDFs, Word documents, presentations, and plain text. Images are analysed by a local LLM to
+        generate rich descriptions. All content is chunked, embedded, and indexed. When you search,
+        your query is compared against every chunk using cosine similarity — returning the most
+        relevant results instantly.
+      </p>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="feature-grid">
+      <div class="feature-card animate-in animate-in-delay-1">
+        <div class="feature-card-icon">🔍</div>
+        <h3>Semantic Search</h3>
+        <p>Find content by meaning, not just keywords. Natural language queries across all your documents.</p>
+      </div>
+
+      <div class="feature-card animate-in animate-in-delay-2">
+        <div class="feature-card-icon">👁️</div>
+        <h3>Image Understanding</h3>
+        <p>Local LLM generates rich descriptions for images, making visual content fully searchable.</p>
+      </div>
+
+      <div class="feature-card animate-in animate-in-delay-3">
+        <div class="feature-card-icon">📂</div>
+        <h3>Multi-Format Support</h3>
+        <p>PDF, DOCX, PPTX, TXT, JPG, PNG — all automatically parsed, chunked, and indexed.</p>
+      </div>
+
+      <div class="feature-card animate-in animate-in-delay-4">
+        <div class="feature-card-icon">⚡</div>
+        <h3>Real-Time Monitoring</h3>
+        <p>Watchdog-based file monitor tracks creates, updates, deletes, and renames in real time.</p>
+      </div>
+
+      <div class="feature-card animate-in animate-in-delay-5">
+        <div class="feature-card-icon">🔒</div>
+        <h3>Local-First</h3>
+        <p>Your data never leaves your machine. All processing and indexing happens on your own hardware.</p>
+      </div>
+
+      <div class="feature-card animate-in animate-in-delay-6">
+        <div class="feature-card-icon">🧩</div>
+        <h3>Chunk-Based Retrieval</h3>
+        <p>Documents are split into overlapping chunks for precise, granular search results.</p>
+      </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="glass-card animate-in animate-in-delay-3" style="margin-top: 32px;">
+      <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 16px; color: var(--text-primary);">
+        Tech Stack
+      </h2>
+      <div class="tech-badges">
+        <span class="tech-badge">Python</span>
+        <span class="tech-badge">FastAPI</span>
+        <span class="tech-badge">MySQL</span>
+        <span class="tech-badge">SentenceTransformers</span>
+        <span class="tech-badge">Ollama</span>
+        <span class="tech-badge">MiniCPM-V</span>
+        <span class="tech-badge">PyMuPDF</span>
+        <span class="tech-badge">python-pptx</span>
+        <span class="tech-badge">docx2txt</span>
+        <span class="tech-badge">Watchdog</span>
+        <span class="tech-badge">NumPy</span>
+        <span class="tech-badge">Airflow</span>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 </body>
 </html>

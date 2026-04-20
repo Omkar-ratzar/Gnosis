@@ -1,58 +1,149 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
-  <style>
-    body { font-family: Arial; background:#111; color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; }
-    .box { background:#1e1e1e; padding:25px; border-radius:10px; width:300px; }
-    input, button { width:100%; margin-top:10px; padding:10px; }
-    button { background:#4CAF50; border:none; color:white; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Gnosis — Intelligent document search and knowledge discovery platform. Login to access your knowledge base." />
+  <title>Gnosis — Login</title>
+  <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
 
-<div class="box">
-  <h3>Gnosis Login</h3>
-  <input id="email" placeholder="Email" />
-  <input id="password" type="password" placeholder="Password" />
-  <button onclick="login()">Login</button>
-  <button onclick="register()">Register</button>
+<div class="login-wrapper">
+  <div class="login-card glass-card animate-in">
+
+    <div class="login-header">
+      <div class="brand-icon-lg">🔮</div>
+      <h1>Welcome to Gnosis</h1>
+      <p>Your intelligent knowledge base</p>
+    </div>
+
+    <div class="input-group">
+      <label for="email">Email</label>
+      <input class="input-field" type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+    </div>
+
+    <div class="input-group">
+      <label for="password">Password</label>
+      <input class="input-field" type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <div id="statusMsg" class="status-message"></div>
+
+    <div class="login-actions" style="margin-top: 24px;">
+      <button class="btn btn-primary btn-lg" id="loginBtn" onclick="handleLogin()">
+        Sign In
+      </button>
+      <button class="btn btn-secondary btn-lg" id="registerBtn" onclick="handleRegister()">
+        Register
+      </button>
+    </div>
+
+  </div>
 </div>
 
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
 <script>
-async function login() {
-  const res = await fetch("/auth/login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      email: email.value,
-      password: password.value
-    })
-  });
+  const emailEl = document.getElementById('email');
+  const passEl = document.getElementById('password');
+  const statusMsg = document.getElementById('statusMsg');
 
-  const data = await res.json();
-
-  if (res.ok) {
-    localStorage.setItem("token", data.access_token);
-    window.location.href = "/upload";
-  } else {
-    alert(data.detail);
+  function showStatus(message, type) {
+    statusMsg.textContent = message;
+    statusMsg.className = 'status-message visible ' + type;
   }
-}
 
-async function register() {
-  const res = await fetch("/auth/register", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      email: email.value,
-      password: password.value
-    })
+  function hideStatus() {
+    statusMsg.className = 'status-message';
+  }
+
+  function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast show ' + type;
+    setTimeout(() => toast.className = 'toast', 3000);
+  }
+
+  function setBtnLoading(btn, loading) {
+    if (loading) {
+      btn.dataset.origText = btn.textContent;
+      btn.innerHTML = '<span class="spinner"></span>';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+    } else {
+      btn.textContent = btn.dataset.origText;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+  }
+
+  async function handleLogin() {
+    hideStatus();
+    const btn = document.getElementById('loginBtn');
+    setBtnLoading(btn, true);
+
+    try {
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emailEl.value,
+          password: passEl.value
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('token', data.access_token);
+        showToast('Welcome back! Redirecting...', 'success');
+        setTimeout(() => window.location.href = '/upload', 800);
+      } else {
+        showStatus(data.detail || 'Invalid credentials', 'error');
+      }
+    } catch (err) {
+      showStatus('Network error. Please try again.', 'error');
+    } finally {
+      setBtnLoading(btn, false);
+    }
+  }
+
+  async function handleRegister() {
+    hideStatus();
+    const btn = document.getElementById('registerBtn');
+    setBtnLoading(btn, true);
+
+    try {
+      const res = await fetch('/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emailEl.value,
+          password: passEl.value
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showStatus('Account created! You can now sign in.', 'success');
+        showToast('Registration successful ✓', 'success');
+      } else {
+        showStatus(data.detail || 'Registration failed', 'error');
+      }
+    } catch (err) {
+      showStatus('Network error. Please try again.', 'error');
+    } finally {
+      setBtnLoading(btn, false);
+    }
+  }
+
+  // Enter key submits
+  passEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
   });
-
-  const data = await res.json();
-  alert(data.msg || data.detail);
-}
 </script>
 
 </body>

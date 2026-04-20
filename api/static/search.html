@@ -1,48 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Search</title>
-  <style>
-    body { font-family: Arial; padding:40px; }
-    nav a { margin-right:15px; }
-    .result { margin-top:10px; padding:10px; border:1px solid #ddd; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Search your Gnosis knowledge base using natural language queries. Powered by semantic similarity." />
+  <title>Gnosis — Search</title>
+  <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
 
-<nav>
-  <a href="/upload">Upload</a>
-  <a href="/search">Search</a>
-  <a href="/about">About</a>
+<!-- Navbar -->
+<nav class="navbar">
+  <a href="/" class="nav-brand">
+    <span class="brand-icon">🔮</span>
+    Gnosis
+  </a>
+  <div class="nav-links">
+    <a href="/upload" id="nav-upload">Upload</a>
+    <a href="/search" class="active" id="nav-search">Search</a>
+    <a href="/about" id="nav-about">About</a>
+  </div>
 </nav>
 
-<h2>Search</h2>
+<div class="page-wrapper">
+  <div class="page-content">
 
-<input id="query" placeholder="Enter query" style="width:300px;" />
-<button onclick="runSearch()">Search</button>
+    <!-- Header -->
+    <div class="page-header animate-in">
+      <h1>Semantic Search</h1>
+      <p>Ask anything — Gnosis finds the most relevant content across your documents.</p>
+    </div>
 
-<div id="results"></div>
+    <!-- Search Bar -->
+    <div class="glass-card animate-in animate-in-delay-1">
+      <div class="search-bar">
+        <input class="input-field" type="text" id="queryInput"
+               placeholder="What are you looking for?"
+               autocomplete="off" />
+        <button class="btn btn-primary btn-lg" id="searchBtn" onclick="runSearch()">
+          Search
+        </button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-container" id="resultsContainer">
+      <!-- Empty state -->
+      <div class="empty-state animate-in animate-in-delay-2" id="emptyState">
+        <div class="empty-state-icon">🔍</div>
+        <h3>Start searching</h3>
+        <p>Enter a query above to find relevant documents</p>
+      </div>
+
+      <!-- Loading -->
+      <div id="loadingState" style="display:none; text-align:center; padding:48px;">
+        <div class="spinner" style="margin:0 auto; width:28px; height:28px; border-width:3px;"></div>
+        <p style="margin-top:16px; color:var(--text-muted); font-size:0.875rem;">Searching your knowledge base...</p>
+      </div>
+
+      <!-- Results List -->
+      <div id="resultsList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
 
 <script>
-async function runSearch() {
-  const res = await fetch("/api/search", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ query: query.value })
+  const queryInput = document.getElementById('queryInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const emptyState = document.getElementById('emptyState');
+  const loadingState = document.getElementById('loadingState');
+  const resultsList = document.getElementById('resultsList');
+
+  function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast show ' + type;
+    setTimeout(() => toast.className = 'toast', 3000);
+  }
+
+  async function runSearch() {
+    const query = queryInput.value.trim();
+    if (!query) {
+      showToast('Please enter a search query', 'error');
+      return;
+    }
+
+    // Show loading
+    emptyState.style.display = 'none';
+    resultsList.innerHTML = '';
+    loadingState.style.display = 'block';
+    searchBtn.disabled = true;
+    searchBtn.innerHTML = '<span class="spinner"></span>';
+    searchBtn.style.opacity = '0.7';
+
+    try {
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+
+      const data = await res.json();
+      loadingState.style.display = 'none';
+
+      if (!Array.isArray(data) || data.length === 0) {
+        resultsList.innerHTML = `
+          <div class="empty-state" style="padding:40px;">
+            <div class="empty-state-icon">📭</div>
+            <h3>No results found</h3>
+            <p>Try rephrasing your query or uploading more documents</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Render results header
+      let html = `<div class="results-header">${data.length} result${data.length > 1 ? 's' : ''} found</div>`;
+
+      data.forEach((r, i) => {
+        const ext = r.file ? r.file.split('.').pop().toUpperCase() : '?';
+        const scorePercent = (r.score * 100).toFixed(1);
+        const icon = getFileIcon(ext);
+        const chunk = r.chunk ? escapeHtml(r.chunk) : '';
+
+        html += `
+          <div class="result-card animate-in animate-in-delay-${Math.min(i + 1, 6)}">
+            <div class="result-card-header">
+              <span class="result-filename">
+                ${icon} ${escapeHtml(r.file || 'Unknown')}
+              </span>
+              <span class="result-score">${scorePercent}%</span>
+            </div>
+            ${chunk ? `<div class="result-chunk">${chunk}</div>` : ''}
+          </div>
+        `;
+      });
+
+      resultsList.innerHTML = html;
+
+    } catch (err) {
+      loadingState.style.display = 'none';
+      showToast('Search failed. Please try again.', 'error');
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Search';
+      searchBtn.style.opacity = '1';
+    }
+  }
+
+  function getFileIcon(ext) {
+    const map = {
+      'PDF': '📕', 'TXT': '📝', 'DOCX': '📘',
+      'PPTX': '📙', 'JPG': '🖼️', 'JPEG': '🖼️', 'PNG': '🖼️'
+    };
+    return map[ext] || '📄';
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Enter key
+  queryInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') runSearch();
   });
 
-  const data = await res.json();
-
-  const container = document.getElementById("results");
-  container.innerHTML = "";
-
-  data.forEach(r => {
-    const div = document.createElement("div");
-    div.className = "result";
-    div.innerText = `File: ${r.file} | Score: ${r.score}`;
-    container.appendChild(div);
-  });
-}
+  // Auto-focus
+  queryInput.focus();
 </script>
 
 </body>

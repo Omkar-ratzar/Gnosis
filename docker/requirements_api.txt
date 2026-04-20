@@ -1,3 +1,10 @@
+fastapi==0.136.0
+passlib==1.7.4
+pydantic==2.13.2
+python-jose==3.5.0
+uvicorn
+psycopg2-binary
+dotenv
 capp==0.0
 docx2txt==0.9
 fitz==0.0.1.dev2

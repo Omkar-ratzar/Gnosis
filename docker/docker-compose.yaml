@@ -102,6 +102,27 @@ x-airflow-common:
       condition: service_healthy
 
 services:
+  api:
+    build:
+        context: ../
+        dockerfile: docker/Dockerfile.api
+    container_name: gnosis_api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_USER: airflow
+      DB_PASSWORD: airflow
+      DB_NAME: gnosis_db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../api:/code/api
+      - ../app:/code/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: bash -c "pip install python-multipart && uvicorn api.main:app --host 0.0.0.0 --port 8000"
   postgres:
     image: postgres:16
     environment:

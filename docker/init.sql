@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS all_files (
     file_path VARCHAR(1024) UNIQUE NOT NULL,
     file_status VARCHAR(20) NOT NULL DEFAULT 'NEW',
     last_modified TIMESTAMP
+    user_id INT REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS image_metadata (
@@ -23,3 +24,10 @@ CREATE TABLE IF NOT EXISTS image_metadata (
     exif JSONB,
     status VARCHAR(20) NOT NULL DEFAULT 'NEW'
 );
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
