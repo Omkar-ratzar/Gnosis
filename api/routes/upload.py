@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 import os
 import uuid
-
+import shutil
 router = APIRouter()
 
 # Save uploaded files directly to the Gnosis app/data directory
@@ -17,45 +17,32 @@ ALLOWED_TYPES = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 }
-'''
-uncomment THIS WHILE DEPLOYING
 
-import shutil
 @router.post("/file")
-def upload_file(file: UploadFile = File(...)): # Note: Removed 'async' since shutil is synchronous
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(status_code=400, detail="Invalid file type")
+async def upload_files(files: list[UploadFile] = File(...)): # Change to List
+    print(f"Received {len(files)} files") # Diagnostic line
+    # uploaded_info = []
+    uploaded_info = []
 
-    filename = file.filename
-    file_path = os.path.join(UPLOAD_DIR, filename)
+    for file in files:
+        if file.content_type not in ALLOWED_TYPES:
+            # We skip invalid files or you can raise an error
+            continue
 
-    if os.path.exists(file_path):
-        filename = f"{uuid.uuid4().hex[:8]}_{file.filename}"
+        filename = file.filename
         file_path = os.path.join(UPLOAD_DIR, filename)
 
-    # STREAM THE FILE INSTEAD OF LOADING TO RAM
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        if os.path.exists(file_path):
+            filename = f"{uuid.uuid4().hex[:8]}_{file.filename}"
+            file_path = os.path.join(UPLOAD_DIR, filename)
 
-    return {"message": "File uploaded successfully", "filename": filename}
+        # Using the streaming method for safety
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
 
-    '''
-@router.post("/file")
-async def upload_file(file: UploadFile = File(...)):
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(status_code=400, detail="Invalid file type")
+        uploaded_info.append({"filename": filename, "at": file_path})
 
-    # Keep the original filename for readability in the data directory
-    filename = file.filename
-    file_path = os.path.join(UPLOAD_DIR, filename)
+    if not uploaded_info:
+        raise HTTPException(status_code=400, detail="No valid files were uploaded.")
 
-    # If file already exists, prefix with UUID to avoid overwrite
-    if os.path.exists(file_path):
-        # filename = f"{uuid.uuid4().hex[:8]}_{file.filename} Will uncomment while implementing user based query retrival
-        file_path = os.path.join(UPLOAD_DIR, filename)
-
-    with open(file_path, "wb") as buffer:
-        buffer.write(await file.read())
-    print({"message": "File uploaded successfully", "filename": filename,"at":file_path})
-
-    return {"message": "File uploaded successfully", "filename": filename,"at":file_path}
+    return {"message": f"Successfully uploaded {len(uploaded_info)} files", "files": uploaded_info}

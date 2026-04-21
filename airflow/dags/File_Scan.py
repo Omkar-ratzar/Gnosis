@@ -39,6 +39,7 @@ def file_scan():
                 full_path = os.path.join(root, file)
                 new_files.append(full_path)
                 upsert_file(full_path)
+                print(full_path)
         return new_files
 
     @task(outlets=[new_docs_asset])
@@ -61,6 +62,7 @@ def file_scan():
         for f in files:
             if f.lower().endswith(IMAGE_EXTS) and is_valid(f):
                 valid.append(f)
+                print(f)
                 file_id = get_file_id_by_path(f)
                 if file_id:
                     upsert_image_metadata(

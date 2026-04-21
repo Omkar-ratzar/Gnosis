@@ -34,10 +34,27 @@ def upsert_vectors(ids, vectors, payloads):
         points=points
     )
 
-def search(query_vector, top_k=5):
+#initially ts was my search
+def search_simple_with_duplicates(query_vector, top_k=5):
     results = client.query_points(
         collection_name=COLLECTION_NAME,
         query=query_vector.tolist(),
         limit=top_k
     )
     return results.points
+#CHANGING BECAUSE DUPLICATE RESULTS IN THE QUERY
+
+def search(query_vector, top_k=5):
+    limit = min(top_k * 5, 100)  # hard cap
+    results = client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_vector.tolist(),
+        limit=limit
+    )
+    seen = {}
+    for p in results.points:
+        fid = p.payload["file_id"]
+        if fid not in seen or p.score > seen[fid].score:
+            seen[fid] = p
+    unique = sorted(seen.values(), key=lambda x: x.score, reverse=True)
+    return unique[:top_k]

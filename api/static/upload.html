@@ -3,65 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Upload documents and images to your Gnosis knowledge base for intelligent indexing and search." />
+  <meta name="description" content="Upload documents and images to your Gnosis knowledge base." />
   <title>Gnosis — Upload</title>
   <link rel="stylesheet" href="/static/styles.css" />
+  <style>
+    /* Quick style for the new multi-file list */
+    .file-list-container { margin-top: 20px; width: 100%; }
+    .file-row {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
 </head>
 <body>
 
-<!-- Navbar -->
 <nav class="navbar">
-  <a href="/" class="nav-brand">
-    <span class="brand-icon">🔮</span>
-    Gnosis
-  </a>
+  <a href="/" class="nav-brand"><span class="brand-icon">🔮</span> Gnosis</a>
   <div class="nav-links">
-    <a href="/upload" class="active" id="nav-upload">Upload</a>
-    <a href="/search" id="nav-search">Search</a>
-    <a href="/about" id="nav-about">About</a>
+    <a href="/upload" class="active">Upload</a>
+    <a href="/search">Search</a>
+    <a href="/about">About</a>
   </div>
 </nav>
 
 <div class="page-wrapper">
   <div class="page-content">
-
-    <!-- Header -->
     <div class="page-header animate-in">
       <h1>Upload Files</h1>
-      <p>Add documents and images to your knowledge base for intelligent indexing and semantic search.</p>
+      <p>Add documents to your knowledge base for intelligent indexing.</p>
     </div>
 
-    <!-- Dropzone Card -->
     <div class="glass-card animate-in animate-in-delay-1">
-
       <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
         <div class="dropzone-icon">📄</div>
-        <h3>Drop your file here</h3>
-        <p>or <span class="browse-link">browse</span> to choose a file</p>
+        <h3>Drop files here</h3>
+        <p>or <span class="browse-link">browse</span> to choose files</p>
         <div class="file-types">
-          <span class="file-type-badge">PDF</span>
-          <span class="file-type-badge">DOCX</span>
-          <span class="file-type-badge">PPTX</span>
-          <span class="file-type-badge">TXT</span>
-          <span class="file-type-badge">JPG</span>
-          <span class="file-type-badge">PNG</span>
+          <span class="file-type-badge">PDF</span> <span class="file-type-badge">DOCX</span>
+          <span class="file-type-badge">PPTX</span> <span class="file-type-badge">TXT</span>
+          <span class="file-type-badge">JPG</span> <span class="file-type-badge">PNG</span>
         </div>
       </div>
 
-      <input type="file" id="fileInput" hidden
-             accept=".jpg,.jpeg,.png,.pdf,.docx,.txt,.pptx" />
+      <input type="file" id="fileInput" hidden accept=".jpg,.jpeg,.png,.pdf,.docx,.txt,.pptx" multiple />
 
-      <!-- File Preview -->
-      <div class="file-preview" id="filePreview">
-        <div class="file-preview-icon" id="previewIcon">📄</div>
-        <div class="file-preview-info">
-          <div class="file-preview-name" id="previewName">—</div>
-          <div class="file-preview-size" id="previewSize">—</div>
-        </div>
-        <button class="file-preview-remove" onclick="removeFile()" title="Remove file">✕</button>
-      </div>
+      <div id="fileListContainer" class="file-list-container"></div>
 
-      <!-- Progress -->
       <div class="upload-progress" id="uploadProgress">
         <div class="progress-bar-track">
           <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
@@ -72,34 +64,26 @@
         </div>
       </div>
 
-      <!-- Status -->
       <div class="status-message" id="statusMsg"></div>
 
-      <!-- Upload Button -->
-      <button class="btn btn-primary btn-full btn-lg" id="uploadBtn"
-              onclick="uploadFile()" style="margin-top: 20px;">
-        Upload File
+      <button class="btn btn-primary btn-full btn-lg" id="uploadBtn" onclick="uploadFile()" style="margin-top: 20px;">
+        Upload Files
       </button>
-
     </div>
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast" class="toast"></div>
 
 <script>
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
-  const filePreview = document.getElementById('filePreview');
-  const previewIcon = document.getElementById('previewIcon');
-  const previewName = document.getElementById('previewName');
-  const previewSize = document.getElementById('previewSize');
+  const fileListContainer = document.getElementById('fileListContainer');
   const uploadBtn = document.getElementById('uploadBtn');
   const uploadProgress = document.getElementById('uploadProgress');
   const progressFill = document.getElementById('progressFill');
-  const progressLabel = document.getElementById('progressLabel');
   const progressPercent = document.getElementById('progressPercent');
+  const progressLabel = document.getElementById('progressLabel');
   const statusMsg = document.getElementById('statusMsg');
 
   const ALLOWED_TYPES = [
@@ -109,61 +93,73 @@
   ];
 
   const FILE_ICONS = {
-    'application/pdf': '📕',
-    'text/plain': '📝',
-    'image/jpeg': '🖼️',
-    'image/png': '🖼️',
+    'application/pdf': '📕', 'text/plain': '📝', 'image/jpeg': '🖼️', 'image/png': '🖼️',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '📘',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation': '📙'
   };
 
-  let selectedFile = null;
+  let selectedFiles = [];
 
-  // Drag & Drop
+  // Drag & Drop Handlers
   ['dragenter', 'dragover'].forEach(evt => {
-    dropzone.addEventListener(evt, e => {
-      e.preventDefault();
-      dropzone.classList.add('dragover');
-    });
+    dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('dragover'); });
   });
 
   ['dragleave', 'drop'].forEach(evt => {
-    dropzone.addEventListener(evt, e => {
-      e.preventDefault();
-      dropzone.classList.remove('dragover');
-    });
+    dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('dragover'); });
   });
 
   dropzone.addEventListener('drop', e => {
-    const file = e.dataTransfer.files[0];
-    if (file) selectFile(file);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) selectFiles(files);
   });
 
   fileInput.addEventListener('change', () => {
-    if (fileInput.files[0]) selectFile(fileInput.files[0]);
+    const files = Array.from(fileInput.files);
+    if (files.length > 0) selectFiles(files);
   });
 
-  function selectFile(file) {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      showToast('Unsupported file type', 'error');
-      return;
+  function selectFiles(newFiles) {
+    for (let file of newFiles) {
+      if (ALLOWED_TYPES.includes(file.type)) {
+        if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+          selectedFiles.push(file);
+        }
+      } else {
+        showToast(`Skipped ${file.name}: Unsupported type`, 'error');
+      }
     }
+    updateUI();
+  }
 
-    selectedFile = file;
-    previewIcon.textContent = FILE_ICONS[file.type] || '📄';
-    previewName.textContent = file.name;
-    previewSize.textContent = formatSize(file.size);
-    filePreview.classList.add('visible');
+  function updateUI() {
+    fileListContainer.innerHTML = '';
+    selectedFiles.forEach((file, index) => {
+      const row = document.createElement('div');
+      row.className = 'file-row animate-in';
+      row.innerHTML = `
+        <div style="font-size: 20px; margin-right: 12px;">${FILE_ICONS[file.type] || '📄'}</div>
+        <div style="flex: 1; overflow: hidden;">
+          <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; font-weight: 500;">${file.name}</div>
+          <div style="font-size: 12px; opacity: 0.6;">${formatSize(file.size)}</div>
+        </div>
+        <button onclick="removeSpecificFile(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 18px;">✕</button>
+      `;
+      fileListContainer.appendChild(row);
+    });
     hideStatus();
     uploadProgress.classList.remove('visible');
   }
 
+  function removeSpecificFile(index) {
+    selectedFiles.splice(index, 1);
+    updateUI();
+  }
+
   function removeFile() {
-    selectedFile = null;
+    selectedFiles = [];
     fileInput.value = '';
-    filePreview.classList.remove('visible');
-    hideStatus();
-    uploadProgress.classList.remove('visible');
+    updateUI();
   }
 
   function formatSize(bytes) {
@@ -177,9 +173,7 @@
     statusMsg.className = 'status-message visible ' + type;
   }
 
-  function hideStatus() {
-    statusMsg.className = 'status-message';
-  }
+  function hideStatus() { statusMsg.className = 'status-message'; }
 
   function showToast(message, type) {
     const toast = document.getElementById('toast');
@@ -189,25 +183,20 @@
   }
 
   async function uploadFile() {
-    if (!selectedFile) {
-      showToast('Please select a file first', 'error');
+    if (selectedFiles.length === 0) {
+      showToast('Please select files first', 'error');
       return;
     }
 
     hideStatus();
     uploadBtn.disabled = true;
     uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
-    uploadBtn.style.opacity = '0.7';
-
-    // Show progress
     uploadProgress.classList.add('visible');
-    progressFill.style.width = '0%';
-    progressPercent.textContent = '0%';
-    progressLabel.textContent = 'Uploading...';
 
-    // Simulate progress (real XHR upload with progress)
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    selectedFiles.forEach(file => {
+      formData.append('files', file); // Matches backend 'files'
+    });
 
     const xhr = new XMLHttpRequest();
 
@@ -220,27 +209,25 @@
     });
 
     xhr.addEventListener('load', () => {
-      const data = JSON.parse(xhr.responseText);
-      if (xhr.status >= 200 && xhr.status < 300) {
-        progressFill.style.width = '100%';
-        progressPercent.textContent = '100%';
-        progressLabel.textContent = 'Complete';
-        showStatus('File uploaded successfully!', 'success');
-        showToast('Upload complete ✓', 'success');
-        // Reset after a bit
-        setTimeout(() => {
-          removeFile();
-          uploadProgress.classList.remove('visible');
-          hideStatus();
-        }, 3000);
-      } else {
-        showStatus(data.detail || 'Upload failed', 'error');
-      }
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          progressFill.style.width = '100%';
+          progressPercent.textContent = '100%';
+          progressLabel.textContent = 'Complete';
+          showStatus(`Uploaded ${selectedFiles.length} files successfully!`, 'success');
+          showToast('Upload complete ✓', 'success');
+          setTimeout(() => removeFile(), 3000);
+        } else {
+          const err = typeof data.detail === 'string' ? data.detail : (data.detail?.[0]?.msg || 'Upload failed');
+          showStatus(err, 'error');
+        }
+      } catch (e) { showStatus('Server Error', 'error'); }
       resetBtn();
     });
 
     xhr.addEventListener('error', () => {
-      showStatus('Network error. Please try again.', 'error');
+      showStatus('Network error', 'error');
       resetBtn();
     });
 
@@ -250,10 +237,9 @@
 
   function resetBtn() {
     uploadBtn.disabled = false;
-    uploadBtn.textContent = 'Upload File';
+    uploadBtn.textContent = 'Upload Files';
     uploadBtn.style.opacity = '1';
   }
 </script>
-
 </body>
 </html>
