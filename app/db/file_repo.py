@@ -184,6 +184,7 @@ def move_file(src_path, dest_path):
                 conn.close()
 
 def get_file_id_by_path(path):
+    path=path.strip()
     for attempt in range(MAX_RETRIES):
         conn = None
         cursor = None
@@ -199,9 +200,13 @@ def get_file_id_by_path(path):
 
             cursor.execute(query, (path,))
             row = cursor.fetchone()
+            ##FOR TESTING PURPOSES OIIINLY
+            print(row)
 
             logger.info(f"get_file_id_by_path success: {path}")
-            return row[0] if row else None
+            if not row:
+                return None
+            return row["file_id"]
 
         except Exception as e:
             logger.error(f"get_file_id_by_path failed (attempt {attempt+1}): {path} | error: {e}")
