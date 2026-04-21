@@ -29,7 +29,7 @@ def doc_process():
             raise AirflowSkipException("No new documents")
         return files
 
-    @task(max_active_tis_per_dag=limit)
+    @task(max_active_tis_per_dag=2)
     def process_single(file):
         mark_processing(file["file_path"])
         process_document(file)
