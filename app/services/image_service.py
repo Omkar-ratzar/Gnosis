@@ -49,7 +49,7 @@ def process_image(file):
 
     for i, chunk in enumerate(chunks):
         # ids.append(str(uuid.uuid4()))
-        ids.append(f"{file['file_id']}_{i}")
+        ids.append(str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{file['file_id']}_{i}")))
         payloads.append({
             "file_id": file["file_id"],
             "file_name": file["file_path"],

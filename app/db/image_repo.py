@@ -22,7 +22,7 @@ def upsert_image_metadata(file_id, file_path, description, exif_dict, status="NE
             ON CONFLICT (file_path) DO UPDATE SET
                 file_path = EXCLUDED.file_path,
                 description = EXCLUDED.description,
-                exif = EXCLUDED.exif,
+                exif = EXCLUDED.exif
             """
 
             exif_json = json.dumps(exif_dict) if exif_dict else None
