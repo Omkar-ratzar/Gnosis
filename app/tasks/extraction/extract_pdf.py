@@ -11,6 +11,5 @@ def extract_pdf(path):
     text = ""
     for page in doc:
         text += page.get_text()
-    mark_processed(normalize_path(path))
     logger.info("PDF has been extracted. Path:"+path)
     return text

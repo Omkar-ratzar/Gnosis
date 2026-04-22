@@ -23,7 +23,6 @@ def upsert_image_metadata(file_id, file_path, description, exif_dict, status="NE
                 file_path = EXCLUDED.file_path,
                 description = EXCLUDED.description,
                 exif = EXCLUDED.exif,
-                status = EXCLUDED.status
             """
 
             exif_json = json.dumps(exif_dict) if exif_dict else None

@@ -1,9 +1,12 @@
 from app.tasks.extraction.dispatcher import extract_document
 from app.tasks.processing.chunk_text import chunk_text
 from app.tasks.embedding.embed_chunks import embed_chunks
-from app.tasks.embedding.vector_store import upsert_vectors, init_collection
+from app.tasks.embedding.vector_store import upsert_vectors, init_collection,delete_vectors_by_file_id
 from app.core.log import logger
+from app.db.file_repo import mark_processed
 from app.config.config import config
+from app.core.utils import normalize_path
+
 import uuid
 
 def process_document(file):
@@ -35,11 +38,20 @@ def process_document(file):
     payloads = []
 
     for i, chunk in enumerate(chunks):
-        ids.append(str(uuid.uuid4()))
+        ids.append(f"{file['file_id']}_{i}")
         payloads.append({
             "file_id": file["file_id"],
             "file_name": file["file_path"],
             "text": chunk
         })
+    if not ids:
+        logger.error(f"No valid IDs/chunks for file {file['file_id']}, skipping delete/upsert")
+        return
+    try:
+        delete_vectors_by_file_id(file["file_id"])
+        upsert_vectors(ids, vectors, payloads)
+        mark_processed(["file_path"])
 
-    upsert_vectors(ids, vectors, payloads)
+    except Exception as e:
+        logger.error(f"Vector upsert failed for {file['file_id']}: {e}")
+        raise

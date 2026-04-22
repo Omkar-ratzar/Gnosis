@@ -1,5 +1,5 @@
 from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance, PointStruct
+from qdrant_client.models import VectorParams, Distance, PointStruct,Filter, FieldCondition, MatchValue
 from app.config.config import config
 from dotenv import load_dotenv
 import uuid
@@ -58,3 +58,20 @@ def search(query_vector, top_k=5):
             seen[fid] = p
     unique = sorted(seen.values(), key=lambda x: x.score, reverse=True)
     return unique[:top_k]
+
+#to delete old chunks before upserting new ones
+
+def delete_vectors_by_file_id(file_id: int):
+    client.delete(
+        collection_name=COLLECTION_NAME,
+        points_selector=Filter(
+            must=[
+                FieldCondition(
+                    key="file_id",
+                    match=MatchValue(value=file_id)
+                )
+            ]
+        )
+    )
+
+#100th commit in laast 365 days ITMO rhinks

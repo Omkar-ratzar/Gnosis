@@ -5,9 +5,9 @@ import time
 from app.core.log import logger
 from app.config.config import config
 from psycopg2.extras import RealDictCursor
+import os
 MAX_RETRIES = config["processing"]["max_retries"]
 # MAX_RETRIES = 3
-
 def upsert_file(path):
     for attempt in range(MAX_RETRIES):
         conn = None
@@ -17,14 +17,12 @@ def upsert_file(path):
             cursor = conn.cursor()
 
             query = """
-            INSERT INTO all_files (file_path, file_status, last_modified)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (file_path) DO UPDATE SET
-                last_modified = EXCLUDED.last_modified,
-                file_status = 'NEW'
+            INSERT INTO all_files (file_path, file_status)
+            VALUES (%s, 'NEW')
+            ON CONFLICT (file_path) DO NOTHING
             """
 
-            cursor.execute(query, (path, "NEW", datetime.now()))
+            cursor.execute(query, (path,))
             conn.commit()
 
             logger.info(f"upsert_file success: {path}")
@@ -33,17 +31,21 @@ def upsert_file(path):
         except Exception as e:
             if conn:
                 conn.rollback()
-            logger.error(f"upsert_file failed (attempt {attempt+1}): {path} | error: {e}")
+
+            logger.error(
+                f"upsert_file failed (attempt {attempt+1}): {path} | error: {e}"
+            )
+
             if attempt == MAX_RETRIES - 1:
                 raise
-            time.sleep(1 * (attempt + 1))
+
+            time.sleep(attempt + 1)
 
         finally:
             if cursor:
                 cursor.close()
             if conn:
                 conn.close()
-
 def mark_modified(path):
     for attempt in range(MAX_RETRIES):
         conn = None

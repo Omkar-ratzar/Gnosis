@@ -16,7 +16,6 @@ def extract_pptx(path):
                     content = para.text.strip()
                     if content:
                         text.append(f"[Slide {slide_num+1}] {content}")
-    mark_processed(normalize_path(path))
     logger.info("PPTX has been extracted. Path:"+path)
     return "\n".join(text)
 

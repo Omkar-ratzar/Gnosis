@@ -48,3 +48,4 @@ img_process()
 #This is very abstract rn but I will keep it as is for now, will break process_document into multiple tasks: text extraction, chunking, embedding for better vision but lets check this for now
 
 
+
