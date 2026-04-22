@@ -50,7 +50,7 @@ def process_document(file):
     try:
         delete_vectors_by_file_id(file["file_id"])
         upsert_vectors(ids, vectors, payloads)
-        mark_processed(["file_path"])
+        mark_processed(file["file_path"])
 
     except Exception as e:
         logger.error(f"Vector upsert failed for {file['file_id']}: {e}")
