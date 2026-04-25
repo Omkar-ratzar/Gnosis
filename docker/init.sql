@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS all_files (
     file_id SERIAL PRIMARY KEY,
     file_path VARCHAR(1024) UNIQUE NOT NULL,
     file_status VARCHAR(20) NOT NULL DEFAULT 'NEW',
-    last_modified TIMESTAMP
+    last_modified TIMESTAMP,
     user_id INT REFERENCES users(id)
 );
 

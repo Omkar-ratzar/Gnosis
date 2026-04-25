@@ -19,7 +19,8 @@ def init_collection(dim: int):
 
     client.create_collection(
         collection_name=COLLECTION_NAME,
-        vectors_config=VectorParams(size=dim, distance=Distance.COSINE),
+        vectors_config=VectorParams(size=dim, distance=Distance.COSINE), #cosine similarity used for vectors
+        
     )
 
 
@@ -45,13 +46,14 @@ def search_simple_with_duplicates(query_vector, top_k=5):
 #CHANGING BECAUSE DUPLICATE RESULTS IN THE QUERY
 
 def search(query_vector, top_k=5):
-    limit = min(top_k * 5, 100)  # hard cap
+    limit = min(top_k * 5, 100)  # hard cap, gets the top 25 chunks for this paarticular embeddings
     results = client.query_points(
         collection_name=COLLECTION_NAME,
         query=query_vector.tolist(),
         limit=limit
     )
     seen = {}
+    #removing duplicate chunks for the same file_id
     for p in results.points:
         fid = p.payload["file_id"]
         if fid not in seen or p.score > seen[fid].score:
