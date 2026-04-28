@@ -73,6 +73,55 @@ Before continuing, you will need:
 - Apache Airflow Installation (or utilize our Docker orchestration)
 - Qdrant Vector Database
 - Ollama Engine (with `minicpm-v` active)
+Here's a clean system requirements table for your README:
+markdown
+
+## System Requirements
+
+### Minimum Requirements
+| Component | Minimum | Recommended | Notes |
+|-----------|---------|-------------|-------|
+| **RAM** | 8 GB | 16 GB | Airflow + model loading is memory-heavy |
+| **CPU** | 4 cores | 8 cores | Airflow runs multiple concurrent processes |
+| **Disk** | 10 GB free | 20 GB+ | Models, Docker images, and data storage |
+| **OS** | Linux / macOS / Windows (WSL2) | Linux / macOS | Native Docker performs best on Linux |
+| **Docker** | 24.0+ | Latest | Required |
+| **Docker Compose** | 2.20+ | Latest | Required |
+| **GPU** | Optional | NVIDIA (CUDA 11.8+) | CPU fallback available, GPU strongly recommended for image processing |
+
+### Software Dependencies
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| **Docker** | 24.0+ | Container orchestration |
+| **Docker Compose** | 2.20+ | Multi-container management |
+| **Ollama** | Latest | Running MiniCPM-V locally for image descriptions |
+| **NVIDIA Container Toolkit** | Latest | Required only if using GPU |
+
+### Ollama Model
+| Model | Size | Purpose |
+|-------|------|---------|
+| `minicpm-v` | ~5 GB | Vision-language model for image understanding |
+
+Pull it before starting:
+```bash
+ollama pull minicpm-v
+```
+
+### Port Availability
+| Port | Service |
+|------|---------|
+| `8000` | FastAPI (Gnosis UI + API) |
+| `8085` | Airflow Web UI |
+| `6333` | Qdrant Vector DB |
+| `5432` | PostgreSQL |
+| `6379` | Redis |
+| `11434` | Ollama |
+
+### GPU Notes
+- Without a GPU, image processing via MiniCPM-V will be **significantly slower**
+- Document processing (PDF, DOCX, PPTX) works fine on CPU only
+- To force CPU mode, set `device.type: "cpu"` in `app/config/config.yaml`
+
 
 ### Getting Started
 
